@@ -28,9 +28,6 @@ func main() {
 		log.Fatalf("Error %v", err)
 	}
 
-	fmt.Println(config)
-	os.Exit(0)
-
 	input := os.Args[1]
 
 	client := openai.NewClient(config.ApiKey)
