@@ -1,13 +1,13 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 
-	"github.com/nikonhub/bashelp/internal/config"
 	"github.com/nikonhub/bashelp/internal/openai"
+	"github.com/schachmat/ingo"
 )
 
 func main() {
@@ -15,26 +15,20 @@ func main() {
 		log.Fatalf("Usage: %s <input>\n", os.Args[0])
 	}
 
-	homeDir, err := os.UserHomeDir()
+	apiKey := flag.String("api-key", "", "`APIKEY` to use for OpenAI API")
+	instructions := flag.String("instructions", "You are a CLI assistant that provides Linux commands. Respond only with the exact command, without any explanation or additional text. If multiple commands are needed, separate them with '&&' or ';' as appropriate.", "`INSTRUCTIONS` for the assistant")
 
-	if err != nil {
-		log.Fatalf("Error gettings user home directory: %v", err)
-	}
-
-	configPath := filepath.Join(homeDir, ".bashelp", "config.yml")
-	config, err := config.NewConfig(configPath)
-
-	if err != nil {
-		log.Fatalf("Error %v", err)
+	if err := ingo.Parse("bashelp"); err != nil {
+		log.Fatal(err)
 	}
 
 	input := os.Args[1]
 
-	client := openai.NewClient(config.ApiKey)
-	output, err := client.Complete(config.Instructions, input)
+	client := openai.NewClient(*apiKey)
+	output, err := client.Complete(*instructions, input)
 
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	fmt.Println(output)
